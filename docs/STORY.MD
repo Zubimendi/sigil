@@ -38,6 +38,12 @@ points that make suppression expensive. That reframing, from "is the log
 intact?" to "can the log tell me when it's incomplete?", is what separates
 compliance theater from evidence.
 
+## Medium tags
+#AuditLogging #NestJS #PostgreSQL #SecurityEngineering #SystemDesign #SoftwareArchitecture #Cybersecurity #DevSecOps #DistributedSystems #Observability
+
+## LinkedIn tags
+#SoftwareEngineering #Security #SystemDesign #AuditTrail #NestJS #PostgreSQL #DataIntegrity #Cybersecurity #DeveloperExperience #Observability #Compliance
+
 ## Interview talking points
 1. Open with the lifecycle gap (guards before interceptors) and the fix;
    it's concrete, checkable, and unusual.

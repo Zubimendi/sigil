@@ -1,0 +1,445 @@
+{
+  "info": {
+    "name": "Sigil API Test Collection",
+    "description": "Starter Postman collection for the Sigil collector, verifier, archive, and retention flows.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "sigil-api-tests-2026-10-28"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "tenantId",
+      "value": "tenant-acme",
+      "type": "string"
+    },
+    {
+      "key": "sourceId",
+      "value": "source-gateway-01",
+      "type": "string"
+    },
+    {
+      "key": "streamId",
+      "value": "stream-tenant-acme-01",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "018b2f7b-f9b1-7d2d-b4ee-4d9d5f1d6f11",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tenants",
+      "item": [
+        {
+          "name": "Create Tenant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Health\",\n  \"slug\": \"acme-health\",\n  \"status\": \"ACTIVE\",\n  \"created_by\": \"platform-admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tenants",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tenants"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tenant",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tenants/{{tenantId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tenants",
+                "{{tenantId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sources",
+      "item": [
+        {
+          "name": "Register Source",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenantId}}\",\n  \"name\": \"Gateway Proxy\",\n  \"kind\": \"GATEWAY\",\n  \"heartbeat_s\": 60,\n  \"public_key\": \"ed25519_public_key_example\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sources",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sources"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Rotate Source Key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_id\": \"{{sourceId}}\",\n  \"public_key\": \"ed25519_public_key_v2\",\n  \"valid_from\": \"2026-10-28T12:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sources/{{sourceId}}/keys",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sources",
+                "{{sourceId}}",
+                "keys"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Post Signed Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Sigil-Source",
+                "value": "{{sourceId}}"
+              },
+              {
+                "key": "X-Sigil-Signature",
+                "value": "ed25519:base64signaturehere"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenantId}}\",\n  \"source_id\": \"{{sourceId}}\",\n  \"stream_id\": \"{{streamId}}\",\n  \"received_at\": \"2026-10-28T12:00:00Z\",\n  \"batch_hash\": \"sha256:1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f\",\n  \"events\": [\n    {\n      \"event_id\": \"018b2f7b-f9b1-7d2d-b4ee-4d9d5f1d6f11\",\n      \"source_seq\": 101,\n      \"occurred_at\": \"2026-10-28T11:59:58Z\",\n      \"actor\": {\n        \"type\": \"user\",\n        \"id\": \"user-42\",\n        \"session_id\": \"sess-7\"\n      },\n      \"action\": \"patient.record.read\",\n      \"resource\": {\n        \"type\": \"patient\",\n        \"id\": \"pat-512\"\n      },\n      \"outcome\": \"SUCCESS\",\n      \"reason_code\": \"NONE\",\n      \"sensitivity\": \"PHI\",\n      \"trace_id\": \"3a0a7e3d-6e33-4cb4-9d04-1c82ec0b0b88\",\n      \"request_id\": \"req-01-778833\",\n      \"policy_version\": \"v2026-10\",\n      \"changes\": [\"diagnosis\", \"last_accessed_at\"],\n      \"body\": {\n        \"patient_id\": \"pat-512\",\n        \"field\": \"diagnosis\"\n      },\n      \"payload_commitment\": \"sha256:9f8e7d6c5b4a39281726354433221100aabbccddeeff00112233445566778899\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/events/batches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "events",
+                "batches"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Query Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/events?stream_id={{streamId}}&limit=50&order=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "stream_id",
+                  "value": "{{streamId}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "order",
+                  "value": "desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Denial Event Example",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenantId}}\",\n  \"source_id\": \"{{sourceId}}\",\n  \"event_id\": \"018b2f7b-f9b1-7d2d-b4ee-4d9d5f1d6f12\",\n  \"source_seq\": 102,\n  \"occurred_at\": \"2026-10-28T12:00:15Z\",\n  \"actor\": {\n    \"type\": \"user\",\n    \"id\": \"user-999\",\n    \"session_id\": \"sess-guest\"\n  },\n  \"action\": \"patient.record.read\",\n  \"resource\": {\n    \"type\": \"patient\",\n    \"id\": \"pat-512\"\n  },\n  \"outcome\": \"DENIED\",\n  \"reason_code\": \"FORBIDDEN\",\n  \"sensitivity\": \"PHI\",\n  \"trace_id\": \"ed3d8e4a-2f0a-4095-b9c6-7173e8d8b7a2\",\n  \"request_id\": \"req-deny-1001\",\n  \"policy_version\": \"v2026-10\",\n  \"changes\": [],\n  \"body\": {\n    \"decision\": \"DENIED\",\n    \"rule\": \"tenant-isolation\"\n  },\n  \"payload_commitment\": \"sha256:uuid-commitment-denied-1001\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/events/batches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "events",
+                "batches"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Verification",
+      "item": [
+        {
+          "name": "Verify Inclusion Proof",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stream_id\": \"{{streamId}}\",\n  \"event_id\": \"{{eventId}}\",\n  \"leaf_index\": 0,\n  \"proof\": [\n    \"sha256:1c5b8d4a86db5a2cceb79fd8d15e80fcb9927df641ab4e1b98d6d402ecf87ee3\",\n    \"sha256:bf93fdf3d63eba96db2d2a7ee2bf6d20f04074e4d8daba72a0e52940bdbe9f74\"\n  ],\n  \"root_hash\": \"sha256:8bb7d8d7dd66c88d4ab4f921d14ba18267a5d00613752f3a6ba0381626901c67\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/verify/inclusion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "verify",
+                "inclusion"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify-Then-Drop Check",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"archive_id\": \"archive-acme-2026-10-28\",\n  \"object_key\": \"cold/acme/2026/10/28/stream-tenant-acme-01-block-0001.tar.gz\",\n  \"sha256\": \"sha256:7c6b2ae7ddf23cfcbc48643d67abec96efcb1d52df569af3ca7cb005944f392b\",\n  \"verify\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/verify/archive",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "verify",
+                "archive"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Archive & Retention",
+      "item": [
+        {
+          "name": "Create Archive Manifest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stream_id\": \"{{streamId}}\",\n  \"first_block\": 1,\n  \"last_block\": 42,\n  \"object_key\": \"cold/acme/2026/10/28/stream-tenant-acme-01-blocks-1-42.tar.gz\",\n  \"sha256\": \"sha256:cd17d7509f8aaf9d2059cd902aa58512c1a658980841b65f4f22aa67c4d950fd\",\n  \"status\": \"PENDING\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/archive/manifests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "archive",
+                "manifests"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Retention Deletion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"archive_id\": \"archive-acme-2026-10-28\",\n  \"approver_id\": \"compliance-officer\",\n  \"reason\": \"retention-expired\",\n  \"dual_control\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/retention/approvals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "retention",
+                "approvals"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reconciliation",
+      "item": [
+        {
+          "name": "List Findings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reconciliation/findings?kind=GATEWAY_MISSING_APP&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reconciliation",
+                "findings"
+              ],
+              "query": [
+                {
+                  "key": "kind",
+                  "value": "GATEWAY_MISSING_APP"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
