@@ -11,7 +11,7 @@ export class TenantsController {
   }
 
   @Get(':id')
-  get(@Param('id') string id: string) {
+  get(@Param('id') id: string) {
     return this.sigilService.getTenant(id);
   }
 }

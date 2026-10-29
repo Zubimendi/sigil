@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-interface Tenant {
+export interface Tenant {
   id: string;
   name: string;
   slug: string;
